@@ -6,14 +6,6 @@ import (
 
 type openaiConfig struct {
 	APIKey *string `cty:"api_key" hcl:"api_key"`
-
-	DataSets []DataSet `cty:"data_sets" hcl:"data_sets"`
-}
-
-type DataSet struct {
-	Name        string   `cty:"name" hcl:"name"`
-	Description string   `cty:"description" hcl:"description"`
-	Columns     []string `cty:"columns" hcl:"columns"`
 }
 
 func ConfigInstance() interface{} {
