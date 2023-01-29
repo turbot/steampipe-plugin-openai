@@ -23,13 +23,6 @@ func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
 		},
 		Columns: []*plugin.Column{
 			// Top columns
-			/*
-				{Name: "id", Type: proto.ColumnType_STRING, Description: ""},
-				{Name: "object", Type: proto.ColumnType_STRING, Description: ""},
-				{Name: "created", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("CreatedAt").Transform(transform.UnixToTimestamp), Description: "Timestamp of when the model was created."},
-				{Name: "model", Type: proto.ColumnType_STRING, Description: ""},
-				{Name: "usage", Type: proto.ColumnType_STRING, Description: ""},
-			*/
 			{Name: "completion", Type: proto.ColumnType_STRING, Transform: transform.FromField("Text"), Description: ""},
 			{Name: "index", Type: proto.ColumnType_INT, Transform: transform.FromField("Index"), Description: ""},
 			{Name: "finish_reason", Type: proto.ColumnType_STRING, Description: ""},
