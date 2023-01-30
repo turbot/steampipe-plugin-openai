@@ -17,6 +17,21 @@ Install the plugin with [Steampipe](https://steampipe.io):
 steampipe plugin install openai
 ```
 
+Configure your API key in `~/.steampipe/config/openai.spc`:
+
+```hcl
+connection "openai" {
+  plugin  = "openai"
+  api_key = "sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8"
+}
+```
+
+Run steampipe:
+
+```shell
+steampipe query
+```
+
 Run a query:
 
 ```sql
