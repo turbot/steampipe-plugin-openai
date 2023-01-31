@@ -116,5 +116,5 @@ class Log:
 
 """
 Here''s what the above class is doing:
-1.'
+1.';
 ```

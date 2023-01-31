@@ -12,5 +12,5 @@ select
   file_name,
   bytes
 from
-  openai_file
+  openai_file;
 ```
