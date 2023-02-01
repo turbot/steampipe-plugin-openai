@@ -22,13 +22,13 @@ func tableOpenAiFile(ctx context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the file, e.g. davinci."},
-			{Name: "file_name", Type: proto.ColumnType_STRING, Description: ""},
+			{Name: "file_name", Type: proto.ColumnType_STRING, Description: "Name of the file."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("CreatedAt").Transform(transform.UnixToTimestamp), Description: "Timestamp of when the file was created."},
-			{Name: "bytes", Type: proto.ColumnType_INT, Description: ""},
+			{Name: "bytes", Type: proto.ColumnType_INT, Description: "Size of the file in bytes"},
 			// Other columns
-			{Name: "object", Type: proto.ColumnType_STRING, Description: ""},
+			{Name: "object", Type: proto.ColumnType_STRING, Description: "The type of the uploaded document, e.g. file."},
 			{Name: "owner", Type: proto.ColumnType_STRING, Description: "Organization that owns the file, e.g. openai."},
-			{Name: "purpose", Type: proto.ColumnType_STRING, Description: ""},
+			{Name: "purpose", Type: proto.ColumnType_STRING, Description: "The intended purpose of the uploaded documents."},
 		},
 	}
 }

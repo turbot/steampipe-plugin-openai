@@ -24,7 +24,7 @@ select
 from
   openai_completion
 where
-  prompt = 'Write a tagline for an ice cream shop.'
+  prompt = 'Write a tagline for an ice cream shop.';
 ```
 
 ```
@@ -68,7 +68,6 @@ connection "openai" {
 
 Environment variables are also available as an alternate configuration method:
 * `OPENAI_API_KEY`
-
 
 ## Get involved
 

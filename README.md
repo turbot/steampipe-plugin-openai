@@ -40,7 +40,7 @@ select
 from
   openai_completion
 where
-  prompt = 'Write a tagline for an ice cream shop.'
+  prompt = 'Write a tagline for an ice cream shop.';
 ```
 
 ## Developing
