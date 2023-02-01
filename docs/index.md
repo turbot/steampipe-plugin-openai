@@ -51,6 +51,15 @@ Download and install the latest OpenAI plugin:
 steampipe plugin install openai
 ```
 
+### Credentials
+
+| Item        | Description                                                                                                                                                                                                                                                                                 |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Credentials | OpenAI requires an [API Key](https://beta.openai.com/account/api-keys) for all requests.                                                                                                                                                                                 |
+| Permissions | API Keys have the same permissions as the user who creates them, and if the user permissions change, the API key permissions also change.                                                                                                                                               |
+| Radius      | Each connection represents a single OpenAI Installation.                                                                                                                                                                                                                                   |
+| Resolution  | 1. Credentials explicitly set in a steampipe config file (`~/.steampipe/config/openai.spc`)<br />2. Credentials specified in environment variables, e.g., `OPENAI_API_KEY`. |
+
 ### Configuration
 
 Installing the latest openai plugin will create a config file (`~/.steampipe/config/openai.spc`) with a single connection named `openai`:
@@ -60,14 +69,18 @@ connection "openai" {
   plugin = "openai"
 
   # Get your API key at https://beta.openai.com/account/api-keys
+  # This can also be set via the `OPENAI_API_KEY` environment variable.
   api_key = "sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8"
 }
 ```
 
-- `api_key` - API key to authenticate requests.
+### Credentials from Environment Variables
 
-Environment variables are also available as an alternate configuration method:
-* `OPENAI_API_KEY`
+The OpenAI plugin will use the standard OpenAI environment variables to obtain credentials **only if other arguments (`api_key`) are not specified** in the connection:
+
+```sh
+export OPENAI_API_KEY=sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8
+```
 
 ## Get involved
 
