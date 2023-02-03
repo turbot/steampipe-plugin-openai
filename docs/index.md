@@ -16,7 +16,7 @@ og_image: "/images/plugins/turbot/openai-social-graphic.png"
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-List instances in your OpenAI account:
+Generate completions for a given text prompt in your OpenAI account:
 
 ```sql
 select
