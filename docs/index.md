@@ -70,7 +70,7 @@ connection "openai" {
 
   # Get your API key at https://beta.openai.com/account/api-keys
   # This can also be set via the `OPENAI_API_KEY` environment variable.
-  api_key = "sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8"
+  api_key = "sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fay..."
 }
 ```
 
