@@ -19,8 +19,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"openai_completion": tableOpenAiCompletion(ctx),
-			"openai_file":       tableOpenAiFile(ctx),
-			"openai_model":      tableOpenAiModel(ctx),
 		},
 	}
 	return p

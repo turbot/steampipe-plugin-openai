@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/sashabaranov/go-gpt3 v0.0.0-20230128191859-3695eb3ade92
+	github.com/sashabaranov/go-openai v1.9.5
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.3.0
 )
 
