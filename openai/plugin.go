@@ -14,9 +14,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			NewInstance: ConfigInstance,
 		},
 		DefaultTransform: transform.FromGo().NullIfZero(),
-		DefaultGetConfig: &plugin.GetConfig{
-			ShouldIgnoreError: isNotFoundError,
-		},
 		TableMap: map[string]*plugin.Table{
 			"openai_completion": tableOpenAiCompletion(ctx),
 		},
