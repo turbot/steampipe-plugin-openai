@@ -85,4 +85,4 @@ export OPENAI_API_KEY=sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8
 ## Get involved
 
 - Open source: https://github.com/turbot/steampipe-plugin-openai
-- Community: [Slack Channel](https://steampipe.io/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
