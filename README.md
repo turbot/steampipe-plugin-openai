@@ -6,7 +6,7 @@ Use SQL to query models, completions and more from OpenAI.
 
 - **[Get started →](https://hub.steampipe.io/plugins/turbot/openai)**
 - Documentation: [Table definitions & examples](https://hub.steampipe.io/plugins/turbot/openai/tables)
-- Community: [Slack Channel](https://steampipe.io/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/steampipe-plugin-openai/issues)
 
 ## Quick start
