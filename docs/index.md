@@ -83,7 +83,4 @@ The OpenAI plugin will use the standard OpenAI environment variables to obtain c
 export OPENAI_API_KEY=sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8
 ```
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-openai
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
