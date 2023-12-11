@@ -8,6 +8,7 @@ short_name: "openai"
 description: "Steampipe plugin to query models, completions and more from OpenAI."
 og_description: "Query OpenAI with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/openai-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # OpenAI + Steampipe
