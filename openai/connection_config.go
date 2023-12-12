@@ -5,7 +5,7 @@ import (
 )
 
 type openaiConfig struct {
-	APIKey *string `cty:"api_key" hcl:"api_key"`
+	APIKey *string `hcl:"api_key"`
 }
 
 func ConfigInstance() interface{} {
