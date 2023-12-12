@@ -2,9 +2,9 @@
 
 _What's new?_
 
-- The plugin can now be downloaded and used with the [Steampipe CLI](https://steampipe.io/docs), as a [Postgres FDW](https://steampipe.io/docs/steampipe_postgres/overview), as a [SQLite extension](https://steampipe.io/docs//steampipe_sqlite/overview) and as a standalone [exporter](https://steampipe.io/docs/steampipe_export/overview). ([#](https://github.com/turbot/steampipe-plugin-openai/pull/))
-- The table docs have been updated to provide corresponding example queries for Postgres FDW and SQLite extension. ([#](https://github.com/turbot/steampipe-plugin-openai/pull/))
-- Docs license updated to match Steampipe [CC BY-NC-ND license](https://github.com/turbot/steampipe-plugin-openai/blob/main/docs/LICENSE). ([#](https://github.com/turbot/steampipe-plugin-openai/pull/))
+- The plugin can now be downloaded and used with the [Steampipe CLI](https://steampipe.io/docs), as a [Postgres FDW](https://steampipe.io/docs/steampipe_postgres/overview), as a [SQLite extension](https://steampipe.io/docs//steampipe_sqlite/overview) and as a standalone [exporter](https://steampipe.io/docs/steampipe_export/overview). ([#21](https://github.com/turbot/steampipe-plugin-openai/pull/21))
+- The table docs have been updated to provide corresponding example queries for Postgres FDW and SQLite extension. ([#21](https://github.com/turbot/steampipe-plugin-openai/pull/21))
+- Docs license updated to match Steampipe [CC BY-NC-ND license](https://github.com/turbot/steampipe-plugin-openai/blob/main/docs/LICENSE). ([#21](https://github.com/turbot/steampipe-plugin-openai/pull/21))
 
 _Dependencies_
 
