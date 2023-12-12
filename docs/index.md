@@ -8,13 +8,14 @@ short_name: "openai"
 description: "Steampipe plugin to query models, completions and more from OpenAI."
 og_description: "Query OpenAI with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/openai-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # OpenAI + Steampipe
 
 [OpenAI](https://openai.com) is an Artificial Intelligence research and development company that provides APIs for general models.
 
-[Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
+[Steampipe](https://steampipe.io) is an open-source zero-ETL engine to instantly query cloud APIs using SQL.
 
 Generate completions for a given text prompt in your OpenAI account:
 
@@ -82,7 +83,4 @@ The OpenAI plugin will use the standard OpenAI environment variables to obtain c
 export OPENAI_API_KEY=sk-CGG8G29a47ViRhvVsCGPT8BlbkFJBvFr65mZcMJWH8fayZO8
 ```
 
-## Get involved
 
-- Open source: https://github.com/turbot/steampipe-plugin-openai
-- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
