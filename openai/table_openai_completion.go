@@ -66,7 +66,13 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	// these are the defaults before reading settings
 	cr := openai.ChatCompletionRequest{
-		Model:            "text-davinci-003",
+		Model: "gpt-3.5-turbo",
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: d.EqualsQualString("prompt"),
+			},
+		},
 		Temperature:      0.7,
 		MaxTokens:        256,
 		Stop:             []string{},
