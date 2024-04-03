@@ -6,24 +6,24 @@ import (
 	"os"
 	"strings"
 
-	gpt3 "github.com/sashabaranov/go-gpt3"
+	openai "github.com/sashabaranov/go-openai"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
-func connect(ctx context.Context, d *plugin.QueryData) (*gpt3.Client, error) {
+func connect(ctx context.Context, d *plugin.QueryData) (*openai.Client, error) {
 	conn, err := connectCached(ctx, d, nil)
 	if err != nil {
 		return nil, err
 	}
-	return conn.(*gpt3.Client), nil
+	return conn.(*openai.Client), nil
 }
 
 var connectCached = plugin.HydrateFunc(connectUncached).Memoize()
 
 func connectUncached(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (any, error) {
 
-	var conn *gpt3.Client
+	var conn *openai.Client
 
 	// Default to the env var settings
 	apiKey := os.Getenv("OPENAI_API_KEY")
@@ -39,7 +39,7 @@ func connectUncached(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return conn, errors.New("api_key must be configured")
 	}
 
-	conn = gpt3.NewClient(apiKey)
+	conn = openai.NewClient(apiKey)
 
 	return conn, nil
 }
