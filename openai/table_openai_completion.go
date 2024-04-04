@@ -137,7 +137,7 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	prompt := d.EqualsQualString("prompt")
 	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "prompt", prompt)
 
-	resp, err := conn.CreateChatCompletion(context.Background(), cr)
+	resp, err := conn.CreateChatCompletion(ctx, cr)
 
 	if err != nil {
 		plugin.Logger(ctx).Error("openai_completion.listCompletion", "prompt", cr, "completion_error", err)
