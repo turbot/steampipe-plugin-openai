@@ -13,7 +13,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
+func tableOpenAiCompletion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "openai_completion",
 		Description: "Completions available in OpenAI.",
@@ -55,8 +55,11 @@ type CompletionRequestQual struct {
 }
 
 type CompletionRow struct {
-	Completion openai.CompletionChoice
-	Prompt     string
+	Completion   string
+	Prompt       string
+	Index        int
+	FinishReason string
+	LogProbs     openai.LogprobResult
 }
 
 func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -154,13 +157,11 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
 
 		row := CompletionRow{
-			Completion: openai.CompletionChoice{
-				Index:        i.Index,
-				FinishReason: string(i.FinishReason),
-				LogProbs:     logProbs,
-				Text:         i.Message.Content,
-			},
-			Prompt: prompt,
+			Completion:   i.Message.Content,
+			Index:        i.Index,
+			FinishReason: string(i.FinishReason),
+			LogProbs:     logProbs,
+			Prompt:       prompt,
 		}
 		plugin.Logger(ctx).Debug("openai_completion.listCompletion", "row", row)
 
