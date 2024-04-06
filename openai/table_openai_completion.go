@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/jinzhu/copier"
+
 	openai "github.com/sashabaranov/go-openai"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -53,7 +55,7 @@ type CompletionRequestQual struct {
 }
 
 type CompletionRow struct {
-	Completion string
+	Completion openai.CompletionChoice
 	Prompt     string
 }
 
@@ -130,6 +132,7 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 
 	if d.EqualsQuals["prompt"] == nil {
+		plugin.Logger(ctx).Debug("No prompt provided. Returning zero rows.")
 		// No prompt, so return zero rows
 		return nil, nil
 	}
@@ -146,8 +149,26 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "completion_response", resp)
 
 	for _, i := range resp.Choices {
-		row := CompletionRow{i.Message.Content, prompt}
+		// deep copy LogProbs to avoid modifying the original
+		var logProbs openai.LogprobResult
+		copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+
+		row := CompletionRow{
+			Completion: openai.CompletionChoice{
+				Index:        i.Index,
+				FinishReason: string(i.FinishReason),
+				LogProbs:     logProbs,
+				Text:         i.Message.Content,
+			},
+			Prompt: prompt,
+		}
 		plugin.Logger(ctx).Debug("openai_completion.listCompletion", "row", row)
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+
 		d.StreamListItem(ctx, row)
 	}
 
