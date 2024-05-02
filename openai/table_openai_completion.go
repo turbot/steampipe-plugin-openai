@@ -21,7 +21,7 @@ func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
 				{Name: "settings", Require: plugin.Optional},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "completion", Type: proto.ColumnType_STRING, Transform: transform.FromField("Text"), Description: "Completions for a given text prompt."},
 			{Name: "index", Type: proto.ColumnType_INT, Transform: transform.FromField("Index"), Description: "The index location of the result."},
@@ -29,7 +29,7 @@ func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
 			{Name: "log_probs", Type: proto.ColumnType_JSON, Description: "Include the log probabilities on the logprobs most likely tokens, as well the chosen tokens."},
 			{Name: "prompt", Type: proto.ColumnType_STRING, Transform: transform.FromQual("prompt"), Description: "The prompt to generate completions for, encoded as a string."},
 			{Name: "settings", Type: proto.ColumnType_JSON, Transform: transform.FromQual("settings"), Description: "Settings is a JSONB object that accepts any of the completion API request parameters."},
-		},
+		}),
 	}
 }
 

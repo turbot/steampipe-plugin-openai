@@ -15,7 +15,7 @@ func tableOpenAiModel(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listModel,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the model, e.g. davinci."},
 			{Name: "created_at", Type: proto.ColumnType_TIMESTAMP, Transform: transform.FromField("CreatedAt").Transform(transform.UnixToTimestamp), Description: "Timestamp of when the model was created."},
@@ -25,7 +25,7 @@ func tableOpenAiModel(ctx context.Context) *plugin.Table {
 			{Name: "root", Type: proto.ColumnType_STRING, Description: "Root of this model."},
 			{Name: "permission", Type: proto.ColumnType_JSON, Description: "Permissions for the model."},
 			// Always null in testing? {Name: "parent", Type: proto.ColumnType_STRING, Description: ""},
-		},
+		}),
 	}
 }
 
