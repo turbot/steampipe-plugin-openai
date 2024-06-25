@@ -19,7 +19,7 @@ func tableOpenAiFile(ctx context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getFile,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumns([]*plugin.Column{
 			// Top columns
 			{Name: "id", Type: proto.ColumnType_STRING, Description: "ID of the file, e.g. davinci."},
 			{Name: "file_name", Type: proto.ColumnType_STRING, Description: "Name of the file."},
@@ -29,7 +29,7 @@ func tableOpenAiFile(ctx context.Context) *plugin.Table {
 			{Name: "object", Type: proto.ColumnType_STRING, Description: "The type of the uploaded document, e.g. file."},
 			{Name: "owner", Type: proto.ColumnType_STRING, Description: "Organization that owns the file, e.g. openai."},
 			{Name: "purpose", Type: proto.ColumnType_STRING, Description: "The intended purpose of the uploaded documents."},
-		},
+		}),
 	}
 }
 
