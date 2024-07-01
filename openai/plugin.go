@@ -10,6 +10,12 @@ import (
 func Plugin(ctx context.Context) *plugin.Plugin {
 	p := &plugin.Plugin{
 		Name: "steampipe-plugin-openai",
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "org_id",
+				Hydrate: getOrganizationId,
+			},
+		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},
