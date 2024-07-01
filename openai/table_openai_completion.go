@@ -149,12 +149,15 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		plugin.Logger(ctx).Error("openai_completion.listCompletion", "prompt", cr, "completion_error", err)
 		return nil, err
 	}
-	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "completion_response", resp)
 
 	for _, i := range resp.Choices {
 		// deep copy LogProbs to avoid modifying the original
 		var logProbs openai.LogprobResult
-		copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+		err := copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+		if err != nil {
+			plugin.Logger(ctx).Error("openai_completion.listCompletion.CopyWithOption", err)
+			return nil, nil
+		}
 
 		row := CompletionRow{
 			Completion:   i.Message.Content,
@@ -163,7 +166,6 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 			LogProbs:     logProbs,
 			Prompt:       prompt,
 		}
-		plugin.Logger(ctx).Debug("openai_completion.listCompletion", "row", row)
 
 		// Context can be cancelled due to manual cancellation or the limit has been hit
 		if d.RowsRemaining(ctx) == 0 {
