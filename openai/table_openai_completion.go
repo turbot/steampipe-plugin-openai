@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/jinzhu/copier"
-
 	openai "github.com/sashabaranov/go-openai"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -26,8 +25,8 @@ func tableOpenAiCompletion(_ context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "completion", Type: proto.ColumnType_STRING, Transform: transform.FromField("Completion"), Description: "Completions for a given text prompt."},
-			{Name: "index", Type: proto.ColumnType_INT, Transform: transform.FromField("Index"), Description: "The index location of the result."},
+			{Name: "completion", Type: proto.ColumnType_STRING, Description: "Completions for a given text prompt."},
+			{Name: "index", Type: proto.ColumnType_INT, Description: "The index location of the result."},
 			{Name: "finish_reason", Type: proto.ColumnType_STRING, Description: "The reason for the execution to be terminated."},
 			{Name: "log_probs", Type: proto.ColumnType_JSON, Description: "Include the log probabilities on the logprobs most likely tokens, as well the chosen tokens."},
 			{Name: "prompt", Type: proto.ColumnType_STRING, Transform: transform.FromQual("prompt"), Description: "The prompt to generate completions for, encoded as a string."},
@@ -59,7 +58,7 @@ type CompletionRow struct {
 	Prompt       string
 	Index        int
 	FinishReason string
-	LogProbs     openai.LogprobResult
+	LogProbs     *openai.LogProbs
 }
 
 func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -69,13 +68,15 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
+	prompt := getPromptForCompletion(d.EqualsQuals)
+
 	// these are the defaults before reading settings
 	cr := openai.ChatCompletionRequest{
 		Model: "gpt-3.5-turbo",
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleUser,
-				Content: d.EqualsQualString("prompt"),
+				Content: prompt,
 			},
 		},
 		Temperature:      0.7,
@@ -134,13 +135,12 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 	}
 
-	if d.EqualsQuals["prompt"] == nil {
+	if prompt == "" {
 		plugin.Logger(ctx).Debug("No prompt provided. Returning zero rows.")
 		// No prompt, so return zero rows
 		return nil, nil
 	}
 
-	prompt := d.EqualsQualString("prompt")
 	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "prompt", prompt)
 
 	resp, err := conn.CreateChatCompletion(ctx, cr)
@@ -152,18 +152,20 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	for _, i := range resp.Choices {
 		// deep copy LogProbs to avoid modifying the original
-		var logProbs openai.LogprobResult
-		err := copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
-		if err != nil {
-			plugin.Logger(ctx).Error("openai_completion.listCompletion.CopyWithOption", err)
-			return nil, nil
+		var logProbs openai.LogProbs
+		if i.LogProbs != nil {
+			err := copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+			if err != nil {
+				plugin.Logger(ctx).Error("openai_completion.listCompletion.CopyWithOption", err)
+				return nil, nil
+			}
 		}
 
 		row := CompletionRow{
 			Completion:   i.Message.Content,
 			Index:        i.Index,
 			FinishReason: string(i.FinishReason),
-			LogProbs:     logProbs,
+			LogProbs:     &logProbs,
 			Prompt:       prompt,
 		}
 
@@ -176,4 +178,26 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 
 	return nil, nil
+}
+
+//// Get prompt
+// Both are valid, but the order of precedence is:
+// 1. prompt = "my prompt"
+// 2. settings = '{"prompt": "my prompt"}'
+func getPromptForCompletion(quals plugin.KeyColumnEqualsQualMap) string {
+	prompt := ""
+	if quals["prompt"] != nil {
+		return quals["prompt"].GetStringValue()
+	}
+	if quals["settings"] != nil {
+		var crQual CompletionRequestQual
+		err := json.Unmarshal([]byte(quals["settings"].GetJsonbValue()), &crQual)
+		if err != nil {
+			panic("error in unmarshaling the setting value: " + err.Error())
+		}
+		if crQual.Prompt != nil {
+			prompt = *crQual.Prompt
+		}
+	}
+	return prompt
 }
