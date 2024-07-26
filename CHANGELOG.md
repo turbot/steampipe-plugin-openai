@@ -1,3 +1,16 @@
+## v0.4.0 [2024-07-26]
+
+_Enhancements_
+
+- The `org_id` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple OpenAI connections. ([#28](https://github.com/turbot/steampipe-plugin-openai/pull/28))
+- Updated the plugin to use `sashabaranov/go-openai` SDK package instead of `sashabaranov/go-gpt3`. ([#27](https://github.com/turbot/steampipe-plugin-openai/pull/27))
+- The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#35](https://github.com/turbot/steampipe-plugin-openai/pull/35))
+- Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.10.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v5100-2024-04-10) that adds support for connection key columns. ([#28](https://github.com/turbot/steampipe-plugin-openai/pull/28))
+
 ## v0.3.0 [2023-12-12]
 
 _What's new?_
