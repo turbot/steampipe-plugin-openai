@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 
-	gogpt "github.com/sashabaranov/go-gpt3"
+	"github.com/jinzhu/copier"
+	openai "github.com/sashabaranov/go-openai"
+
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
+func tableOpenAiCompletion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "openai_completion",
 		Description: "Completions available in OpenAI.",
@@ -23,8 +25,8 @@ func tableOpenAiCompletion(ctx context.Context) *plugin.Table {
 		},
 		Columns: commonColumns([]*plugin.Column{
 			// Top columns
-			{Name: "completion", Type: proto.ColumnType_STRING, Transform: transform.FromField("Text"), Description: "Completions for a given text prompt."},
-			{Name: "index", Type: proto.ColumnType_INT, Transform: transform.FromField("Index"), Description: "The index location of the result."},
+			{Name: "completion", Type: proto.ColumnType_STRING, Description: "Completions for a given text prompt."},
+			{Name: "index", Type: proto.ColumnType_INT, Description: "The index location of the result."},
 			{Name: "finish_reason", Type: proto.ColumnType_STRING, Description: "The reason for the execution to be terminated."},
 			{Name: "log_probs", Type: proto.ColumnType_JSON, Description: "Include the log probabilities on the logprobs most likely tokens, as well the chosen tokens."},
 			{Name: "prompt", Type: proto.ColumnType_STRING, Transform: transform.FromQual("prompt"), Description: "The prompt to generate completions for, encoded as a string."},
@@ -43,7 +45,6 @@ type CompletionRequestQual struct {
 	N                *int           `json:"n,omitempty"`
 	Stream           *bool          `json:"stream,omitempty"`
 	LogProbs         *int           `json:"logprobs,omitempty"`
-	Echo             *bool          `json:"echo,omitempty"`
 	Stop             []string       `json:"stop,omitempty"`
 	PresencePenalty  *float32       `json:"presence_penalty,omitempty"`
 	FrequencyPenalty *float32       `json:"frequency_penalty,omitempty"`
@@ -53,8 +54,11 @@ type CompletionRequestQual struct {
 }
 
 type CompletionRow struct {
-	gogpt.CompletionChoice
-	Prompt string
+	Completion   string
+	Prompt       string
+	Index        int
+	FinishReason string
+	LogProbs     *openai.LogProbs
 }
 
 func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -64,17 +68,23 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
-	// Default settings taken from the playground UI
-	// https://beta.openai.com/playground
-	cr := gogpt.CompletionRequest{
-		Model:            "text-davinci-003",
+	prompt := getPromptForCompletion(d.EqualsQuals)
+
+	// these are the defaults before reading settings
+	cr := openai.ChatCompletionRequest{
+		Model: "gpt-3.5-turbo",
+		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: prompt,
+			},
+		},
 		Temperature:      0.7,
 		MaxTokens:        256,
 		Stop:             []string{},
 		TopP:             1,
 		FrequencyPenalty: 0,
 		PresencePenalty:  0,
-		BestOf:           1,
 	}
 
 	settingsString := d.EqualsQuals["settings"].GetJsonbValue()
@@ -89,12 +99,6 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 		if crQual.Model != nil {
 			cr.Model = *crQual.Model
-		}
-		if crQual.Prompt != nil {
-			cr.Prompt = *crQual.Prompt
-		}
-		if crQual.Suffix != nil {
-			cr.Suffix = *crQual.Suffix
 		}
 		if crQual.MaxTokens != nil {
 			cr.MaxTokens = *crQual.MaxTokens
@@ -112,10 +116,7 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 			cr.Stream = *crQual.Stream
 		}
 		if crQual.LogProbs != nil {
-			cr.LogProbs = *crQual.LogProbs
-		}
-		if crQual.Echo != nil {
-			cr.Echo = *crQual.Echo
+			cr.LogProbs = *crQual.LogProbs != 0
 		}
 		if crQual.Stop != nil {
 			cr.Stop = crQual.Stop
@@ -126,9 +127,6 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		if crQual.FrequencyPenalty != nil {
 			cr.FrequencyPenalty = *crQual.FrequencyPenalty
 		}
-		if crQual.BestOf != nil {
-			cr.BestOf = *crQual.BestOf
-		}
 		if crQual.LogitBias != nil {
 			cr.LogitBias = crQual.LogitBias
 		}
@@ -137,30 +135,69 @@ func listCompletion(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 	}
 
-	// Both are valid, but the order of precedence is:
-	// 1. prompt = "my prompt"
-	// 2. settings = '{"prompt": "my prompt"}'
-	if d.EqualsQuals["prompt"] != nil {
-		cr.Prompt = d.EqualsQualString("prompt")
-	}
-
-	if cr.Prompt == "" {
+	if prompt == "" {
+		plugin.Logger(ctx).Debug("No prompt provided. Returning zero rows.")
 		// No prompt, so return zero rows
 		return nil, nil
 	}
 
-	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "prompt", cr)
-	resp, err := conn.CreateCompletion(ctx, cr)
+	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "prompt", prompt)
+
+	resp, err := conn.CreateChatCompletion(ctx, cr)
+
 	if err != nil {
 		plugin.Logger(ctx).Error("openai_completion.listCompletion", "prompt", cr, "completion_error", err)
 		return nil, err
 	}
-	plugin.Logger(ctx).Debug("openai_completion.listCompletion", "completion_response", resp)
 
 	for _, i := range resp.Choices {
-		row := CompletionRow{i, cr.Prompt}
+		// deep copy LogProbs to avoid modifying the original
+		var logProbs openai.LogProbs
+		if i.LogProbs != nil {
+			err := copier.CopyWithOption(&logProbs, &i.LogProbs, copier.Option{IgnoreEmpty: true, DeepCopy: true})
+			if err != nil {
+				plugin.Logger(ctx).Error("openai_completion.listCompletion.CopyWithOption", err)
+				return nil, nil
+			}
+		}
+
+		row := CompletionRow{
+			Completion:   i.Message.Content,
+			Index:        i.Index,
+			FinishReason: string(i.FinishReason),
+			LogProbs:     &logProbs,
+			Prompt:       prompt,
+		}
+
+		// Context can be cancelled due to manual cancellation or the limit has been hit
+		if d.RowsRemaining(ctx) == 0 {
+			return nil, nil
+		}
+
 		d.StreamListItem(ctx, row)
 	}
 
 	return nil, nil
+}
+
+//// Get prompt
+// Both are valid, but the order of precedence is:
+// 1. prompt = "my prompt"
+// 2. settings = '{"prompt": "my prompt"}'
+func getPromptForCompletion(quals plugin.KeyColumnEqualsQualMap) string {
+	prompt := ""
+	if quals["prompt"] != nil {
+		return quals["prompt"].GetStringValue()
+	}
+	if quals["settings"] != nil {
+		var crQual CompletionRequestQual
+		err := json.Unmarshal([]byte(quals["settings"].GetJsonbValue()), &crQual)
+		if err != nil {
+			panic("error in unmarshaling the setting value: " + err.Error())
+		}
+		if crQual.Prompt != nil {
+			prompt = *crQual.Prompt
+		}
+	}
+	return prompt
 }
