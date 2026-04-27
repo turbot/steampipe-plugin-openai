@@ -6,7 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/jinzhu/copier v0.4.0
-	github.com/sashabaranov/go-openai v1.20.4
+	github.com/sashabaranov/go-openai v1.41.2
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.13.1
 )
 
