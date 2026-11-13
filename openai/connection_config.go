@@ -1,7 +1,7 @@
 package openai
 
 import (
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 type openaiConfig struct {
@@ -13,9 +13,9 @@ func ConfigInstance() interface{} {
 }
 
 func GetConfig(connection *plugin.Connection) openaiConfig {
-	if connection == nil || connection.Config == nil {
+	if connection == nil || connection.GetConfig() == nil {
 		return openaiConfig{}
 	}
-	config, _ := connection.Config.(openaiConfig)
+	config, _ := connection.GetConfig().(openaiConfig)
 	return config
 }
