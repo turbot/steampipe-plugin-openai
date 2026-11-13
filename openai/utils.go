@@ -11,10 +11,10 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 
-	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v6/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v6/memoize"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin/transform"
 )
 
 func connect(ctx context.Context, d *plugin.QueryData) (*openai.Client, error) {
@@ -52,7 +52,7 @@ func connectUncached(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	return conn, nil
 }
 
-func isNotFoundError(err error) bool {
+func isNotFoundError(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
 	return strings.Contains(err.Error(), "status code: 404")
 }
 
@@ -108,7 +108,7 @@ func getOrganizationIdUncached(ctx context.Context, d *plugin.QueryData, h *plug
 	var orgId string
 	var profile Profile
 
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		orgId = cachedData.(string)
 	} else {
 		url := "https://api.openai.com/v1/me"
@@ -136,7 +136,7 @@ func getOrganizationIdUncached(ctx context.Context, d *plugin.QueryData, h *plug
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		body, err := io.ReadAll(resp.Body)
 
@@ -150,7 +150,9 @@ func getOrganizationIdUncached(ctx context.Context, d *plugin.QueryData, h *plug
 		o := profile.Orgs.Data[0]
 		orgId = o.OrgId
 
-		d.ConnectionManager.Cache.Set(cacheKey, orgId)
+		if err := d.ConnectionCache.Set(ctx, cacheKey, orgId); err != nil {
+			plugin.Logger(ctx).Warn("openai.getOrganizationIdUncached", "cache_set_error", err)
+		}
 	}
 
 	return orgId, nil
